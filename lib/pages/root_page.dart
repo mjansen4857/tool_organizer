@@ -20,8 +20,10 @@ class _RootPageState extends State<RootPage> {
   }
 
   void loginCallback(String username) {
-    loggedIn = true;
-    this.username = username;
+    setState(() {
+      loggedIn = true;
+      this.username = username;
+    });
   }
 
   @override
