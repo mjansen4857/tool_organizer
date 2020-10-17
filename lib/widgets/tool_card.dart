@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class ToolCard extends StatelessWidget {
   final String toolName;
+  final String barcode;
 
-  ToolCard(this.toolName);
+  ToolCard(this.toolName, this.barcode);
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class ToolCard extends StatelessWidget {
           children: <Widget>[
             ListTile(
               title: Text(toolName),
-              subtitle: Text('Not Lent'),
+              subtitle: Text(barcode),
             ),
           ],
         ),
