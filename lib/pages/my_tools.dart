@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tool_organizer/widgets/tool_card.dart';
@@ -8,6 +10,7 @@ class MyTools extends StatefulWidget {
 }
 
 class _MyToolsState extends State<MyTools> {
+  bool _isLoading = true;
   var _toolNameController;
   var _barcodeController;
   List<Widget> _toolCards = [
@@ -23,6 +26,11 @@ class _MyToolsState extends State<MyTools> {
     super.initState();
     _toolNameController = TextEditingController();
     _barcodeController = TextEditingController();
+    Timer(Duration(seconds: 1), () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 
   @override
@@ -35,11 +43,16 @@ class _MyToolsState extends State<MyTools> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ListView(
-          padding: EdgeInsets.all(5),
-          children: _toolCards,
-        ),
+      body: Stack(
+        children: <Widget>[
+          Center(
+            child: ListView(
+              padding: EdgeInsets.all(5),
+              children: _toolCards,
+            ),
+          ),
+          buildLoading(),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -47,6 +60,18 @@ class _MyToolsState extends State<MyTools> {
           _addToolDialog(context);
         },
       ),
+    );
+  }
+
+  Widget buildLoading() {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    return Container(
+      height: 0,
+      width: 0,
     );
   }
 

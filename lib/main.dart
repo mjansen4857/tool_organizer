@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tool_organizer/pages/root_page.dart';
+import 'package:tool_organizer/services/database.dart';
 
 void main() {
   runApp(ToolOrganizer());
@@ -16,7 +17,9 @@ class ToolOrganizer extends StatelessWidget {
         brightness: Brightness.dark,
         accentColor: Colors.indigo,
       ),
-      home: RootPage(),
+      home: RootPage(
+        db: Database(),
+      ),
     );
   }
 }

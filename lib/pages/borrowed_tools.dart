@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tool_organizer/widgets/tool_card.dart';
@@ -8,6 +10,7 @@ class BorrowedTools extends StatefulWidget {
 }
 
 class _BorrowedToolsState extends State<BorrowedTools> {
+  bool _isLoading = true;
   List<Widget> _toolCards = [
     ToolCard('Borrowed Tool 1', 'Return Date: 1/10/20', '6'),
     ToolCard('Borrowed Tool 2', 'Return Date: 1/11/20', '7'),
@@ -19,17 +22,39 @@ class _BorrowedToolsState extends State<BorrowedTools> {
   @override
   void initState() {
     super.initState();
+    Timer(Duration(seconds: 1), () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ListView(
-          padding: EdgeInsets.all(5),
-          children: _toolCards,
-        ),
+      body: Stack(
+        children: <Widget>[
+          Center(
+            child: ListView(
+              padding: EdgeInsets.all(5),
+              children: _toolCards,
+            ),
+          ),
+          buildLoading(),
+        ],
       ),
+    );
+  }
+
+  Widget buildLoading() {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    return Container(
+      height: 0,
+      width: 0,
     );
   }
 }
