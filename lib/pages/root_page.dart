@@ -16,22 +16,30 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   bool _isLoading = true;
   bool _loggedIn = false;
-  String username;
+  String _username;
+  String _fullname;
 
   @override
   void initState() {
     super.initState();
     _loggedIn = false;
-    username = null;
+    _username = null;
     widget.db.openConnection().then((value) => setState(() {
           _isLoading = false;
         }));
   }
 
-  void loginCallback(String username) {
+  void loginCallback(String username, String fullname) {
     setState(() {
       _loggedIn = true;
-      this.username = username;
+      this._username = username;
+      this._fullname = fullname;
+    });
+  }
+
+  void logoutCallback() {
+    setState(() {
+      _loggedIn = false;
     });
   }
 
@@ -41,21 +49,22 @@ class _RootPageState extends State<RootPage> {
       return buildLoading();
     }
     if (!_loggedIn) {
-      return LoginPage(loginCallback: loginCallback);
+      return LoginPage(
+        loginCallback: loginCallback,
+        db: widget.db,
+      );
     } else {
-      return HomePage(username: username);
+      return HomePage(
+        username: _username,
+        fullname: _fullname,
+        logoutCallback: logoutCallback,
+      );
     }
   }
 
   Widget buildLoading() {
-    if (_isLoading) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-    return Container(
-      height: 0,
-      width: 0,
+    return Center(
+      child: CircularProgressIndicator(),
     );
   }
 }

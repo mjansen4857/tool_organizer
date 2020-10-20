@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tool_organizer/services/database.dart';
 
 class LoginPage extends StatefulWidget {
-  final void Function(String) loginCallback;
+  final void Function(String, String) loginCallback;
+  final Database db;
 
-  LoginPage({this.loginCallback});
+  LoginPage({this.loginCallback, this.db});
 
   @override
   State<StatefulWidget> createState() => _LoginPageState();
@@ -13,6 +15,13 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   String _username;
+  String _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _errorText = '';
+  }
 
   bool validateAndSave() {
     final form = _formKey.currentState;
@@ -26,7 +35,15 @@ class _LoginPageState extends State<LoginPage> {
   void validateAndSubmit() {
     if (validateAndSave()) {
       if (_username != null) {
-        widget.loginCallback(_username);
+        widget.db.getUserFullName(_username).then((value) {
+          if (value != null) {
+            widget.loginCallback(_username, value);
+          } else {
+            setState(() {
+              _errorText = 'That user does not exist';
+            });
+          }
+        });
       }
     }
   }
@@ -52,6 +69,7 @@ class _LoginPageState extends State<LoginPage> {
             showLogo(),
             showUsernameInput(),
             showPrimaryButton(),
+            buildErrorText(),
           ],
         ),
       ),
@@ -130,6 +148,18 @@ class _LoginPageState extends State<LoginPage> {
             style: TextStyle(fontSize: 20, color: Colors.grey[200]),
           ),
           onPressed: validateAndSubmit,
+        ),
+      ),
+    );
+  }
+
+  Widget buildErrorText() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+      child: Center(
+        child: Text(
+          _errorText,
+          style: TextStyle(color: Colors.red),
         ),
       ),
     );

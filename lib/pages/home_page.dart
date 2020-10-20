@@ -6,8 +6,10 @@ enum PageState { MY_TOOLS, BORROWED_TOOLS }
 
 class HomePage extends StatefulWidget {
   final String username;
+  final String fullname;
+  final VoidCallback logoutCallback;
 
-  HomePage({this.username});
+  HomePage({this.username, this.fullname, this.logoutCallback});
 
   @override
   State<StatefulWidget> createState() => _HomePageState();
@@ -49,43 +51,66 @@ class _HomePageState extends State<HomePage> {
 
   Widget buildDrawer() {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: <Widget>[
-          UserAccountsDrawerHeader(
-            accountEmail: null,
-            accountName: Text(widget.username),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.grey[850],
-              child: Icon(
-                Icons.build,
-                size: 24,
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                UserAccountsDrawerHeader(
+                  accountEmail: Text(widget.username),
+                  accountName: Text(widget.fullname),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundColor: Colors.grey[850],
+                    child: Icon(
+                      Icons.build,
+                      size: 24,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.business_center,
+                  ),
+                  title: Text('My Tools'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _pageState = PageState.MY_TOOLS;
+                    });
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.build,
+                  ),
+                  title: Text('Borrowed Tools'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _pageState = PageState.BORROWED_TOOLS;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: Container(
+                child: Column(
+                  children: <Widget>[
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.exit_to_app),
+                      title: Text('Sign out'),
+                      onTap: widget.logoutCallback,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.business_center,
-            ),
-            title: Text('My Tools'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() {
-                _pageState = PageState.MY_TOOLS;
-              });
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.build,
-            ),
-            title: Text('Borrowed Tools'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() {
-                _pageState = PageState.BORROWED_TOOLS;
-              });
-            },
           ),
         ],
       ),
