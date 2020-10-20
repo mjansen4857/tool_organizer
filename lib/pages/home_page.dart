@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tool_organizer/pages/collection_page.dart';
+import 'package:tool_organizer/pages/borrowed_tools.dart';
+import 'package:tool_organizer/pages/my_tools.dart';
 
-enum PageState { COLLECTION, PLACEHOLDER1, PLACEHOLDER2 }
+enum PageState { MY_TOOLS, BORROWED_TOOLS }
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -13,7 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  PageState _pageState = PageState.COLLECTION;
+  PageState _pageState = PageState.MY_TOOLS;
 
   @override
   Widget build(BuildContext context) {
@@ -28,25 +29,21 @@ class _HomePageState extends State<HomePage> {
 
   String getAppBarText() {
     switch (_pageState) {
-      case PageState.PLACEHOLDER1:
-        return 'Placeholder 1';
-      case PageState.PLACEHOLDER2:
-        return 'Placeholder 2';
-      case PageState.COLLECTION:
+      case PageState.BORROWED_TOOLS:
+        return 'Borrowed Tools';
+      case PageState.MY_TOOLS:
       default:
-        return 'Tool Collection';
+        return 'My Tools';
     }
   }
 
   Widget buildPageContent() {
     switch (_pageState) {
-      case PageState.PLACEHOLDER1:
-        return Text('Placeholder 1');
-      case PageState.PLACEHOLDER2:
-        return Text('Placeholder 2');
-      case PageState.COLLECTION:
+      case PageState.BORROWED_TOOLS:
+        return BorrowedTools();
+      case PageState.MY_TOOLS:
       default:
-        return CollectionPage();
+        return MyTools();
     }
   }
 
@@ -70,37 +67,23 @@ class _HomePageState extends State<HomePage> {
             leading: Icon(
               Icons.business_center,
             ),
-            title: Text('Collection'),
+            title: Text('My Tools'),
             onTap: () {
               Navigator.pop(context);
               setState(() {
-                _pageState = PageState.COLLECTION;
+                _pageState = PageState.MY_TOOLS;
               });
             },
           ),
-//          Divider(),
           ListTile(
             leading: Icon(
               Icons.build,
             ),
-            title: Text('Placeholder 1'),
+            title: Text('Borrowed Tools'),
             onTap: () {
               Navigator.pop(context);
               setState(() {
-                _pageState = PageState.PLACEHOLDER1;
-              });
-            },
-          ),
-//          Divider(),
-          ListTile(
-            leading: Icon(
-              Icons.build,
-            ),
-            title: Text('Placeholder 2'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() {
-                _pageState = PageState.PLACEHOLDER2;
+                _pageState = PageState.BORROWED_TOOLS;
               });
             },
           ),

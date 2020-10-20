@@ -2,20 +2,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tool_organizer/widgets/tool_card.dart';
 
-class CollectionPage extends StatefulWidget {
+class MyTools extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _CollectionPageState();
+  State<StatefulWidget> createState() => _MyToolsState();
 }
 
-class _CollectionPageState extends State<CollectionPage> {
+class _MyToolsState extends State<MyTools> {
   var _toolNameController;
   var _barcodeController;
   List<Widget> _toolCards = [
-    ToolCard('Test Tool 1', '1'),
-    ToolCard('Test Tool 2', '2'),
-    ToolCard('Test Tool 3', '3'),
-    ToolCard('Test Tool 4', '4'),
-    ToolCard('Test Tool 5', '5'),
+    ToolCard('My Tool 1', 'Barcode: 1', '1'),
+    ToolCard('My Tool 2', 'Barcode: 2', '2'),
+    ToolCard('My Tool 3', 'Barcode: 3', '3'),
+    ToolCard('My Tool 4', 'Barcode: 4', '4'),
+    ToolCard('My Tool 5', 'Barcode: 5', '5'),
   ];
 
   @override
@@ -80,7 +80,9 @@ class _CollectionPageState extends State<CollectionPage> {
                     _toolCards = [
                       ..._toolCards,
                       ToolCard(
-                          _toolNameController.text, _barcodeController.text)
+                          _toolNameController.text,
+                          'Barcode: ' + _barcodeController.text,
+                          _barcodeController.text)
                     ];
                   });
                   _toolNameController.clear();
