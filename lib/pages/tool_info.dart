@@ -1,20 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:tool_organizer/objects/lendable_tool.dart';
+import 'package:tool_organizer/objects/tool.dart';
+import 'package:tool_organizer/services/database.dart';
 
 class ToolInfo extends StatefulWidget {
-  final String barcode;
+  final Tool tool;
 
-  ToolInfo(this.barcode);
+  ToolInfo(this.tool);
 
   @override
   State<StatefulWidget> createState() => _ToolInfoState();
 }
 
 class _ToolInfoState extends State<ToolInfo> {
-  bool _isLoading = true;
-  bool _lendable = true;
-  bool _isLent = true;
   DateTime _selectedReturnDate;
   var _usernameController;
 
@@ -23,11 +23,6 @@ class _ToolInfoState extends State<ToolInfo> {
     super.initState();
     _selectedReturnDate = DateTime.now();
     _usernameController = TextEditingController();
-    Timer(Duration(seconds: 1), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
   }
 
   @override
@@ -48,13 +43,9 @@ class _ToolInfoState extends State<ToolInfo> {
           },
         ),
       ),
-      body: Stack(
-        children: <Widget>[
-          buildListView(),
-          buildLoading(),
-        ],
-      ),
-      floatingActionButton: (!_lendable) || _isLent
+      body: buildListView(),
+      floatingActionButton: !(widget.tool is LendableTool) ||
+              (widget.tool as LendableTool).lentTo != null
           ? null
           : FloatingActionButton(
               child: Icon(Icons.call_made),
@@ -62,18 +53,6 @@ class _ToolInfoState extends State<ToolInfo> {
                 _lendToolDialog(context);
               },
             ),
-    );
-  }
-
-  Widget buildLoading() {
-    if (_isLoading) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-    return Container(
-      height: 0,
-      width: 0,
     );
   }
 
@@ -104,9 +83,16 @@ class _ToolInfoState extends State<ToolInfo> {
                 ),
                 onPressed: () {
                   Navigator.pop(context, true);
-                  print(_usernameController.text);
-                  print(_selectedReturnDate);
-                  //TODO stuff
+                  Database.lendTool(widget.tool.barcode,
+                      _usernameController.text, _selectedReturnDate);
+                  Database.getUserFullName(_usernameController.text)
+                      .then((value) {
+                    setState(() {
+                      (widget.tool as LendableTool).lentTo = value;
+                      (widget.tool as LendableTool).requiredReturnDate =
+                          _selectedReturnDate;
+                    });
+                  });
                   _usernameController.clear();
                 },
               ),
@@ -170,13 +156,7 @@ class _ToolInfoState extends State<ToolInfo> {
   }
 
   Widget buildListView() {
-    if (_isLoading) {
-      return Container(
-        height: 0,
-        width: 0,
-      );
-    }
-    if (_lendable) {
+    if (widget.tool is LendableTool) {
       return ListView(
         padding: EdgeInsets.all(8),
         shrinkWrap: true,
@@ -226,7 +206,7 @@ class _ToolInfoState extends State<ToolInfo> {
           width: 6,
         ),
         Text(
-          'Some Name',
+          widget.tool.toolName,
           style: TextStyle(fontSize: 18),
         ),
       ],
@@ -244,7 +224,7 @@ class _ToolInfoState extends State<ToolInfo> {
           width: 6,
         ),
         Text(
-          widget.barcode,
+          widget.tool.barcode,
           style: TextStyle(fontSize: 18),
         ),
       ],
@@ -262,7 +242,7 @@ class _ToolInfoState extends State<ToolInfo> {
           width: 6,
         ),
         Text(
-          'Some Person',
+          widget.tool.owner,
           style: TextStyle(fontSize: 18),
         ),
       ],
@@ -270,6 +250,7 @@ class _ToolInfoState extends State<ToolInfo> {
   }
 
   Widget buildLendee() {
+    var tool = widget.tool as LendableTool;
     return Row(
       children: <Widget>[
         Text(
@@ -280,7 +261,7 @@ class _ToolInfoState extends State<ToolInfo> {
           width: 6,
         ),
         Text(
-          'Some Person',
+          (tool.lentTo) != null ? tool.lentTo : 'Not Lent',
           style: TextStyle(fontSize: 18),
         ),
       ],
@@ -288,6 +269,7 @@ class _ToolInfoState extends State<ToolInfo> {
   }
 
   Widget buildReturnDate() {
+    var tool = widget.tool as LendableTool;
     return Row(
       children: <Widget>[
         Text(
@@ -298,7 +280,9 @@ class _ToolInfoState extends State<ToolInfo> {
           width: 6,
         ),
         Text(
-          'Some Date',
+          (tool.requiredReturnDate) != null
+              ? tool.requiredReturnDate.toString()
+              : 'Not Lent',
           style: TextStyle(fontSize: 18),
         ),
       ],
@@ -316,7 +300,7 @@ class _ToolInfoState extends State<ToolInfo> {
           width: 6,
         ),
         Text(
-          'Some Date',
+          widget.tool.purchaseDate.toString(),
           style: TextStyle(fontSize: 18),
         ),
       ],
@@ -337,31 +321,21 @@ class _ToolInfoState extends State<ToolInfo> {
         Wrap(
           spacing: 6,
           runSpacing: -8,
-          children: <Widget>[
-            Chip(
-              label: Text('Hand Tool'),
-            ),
-            Chip(
-              label: Text('Power Tool'),
-            ),
-            Chip(
-              label: Text('Saw'),
-            ),
-            Chip(
-              label: Text('Drill'),
-            ),
-            Chip(
-              label: Text('Wrench'),
-            ),
-            Chip(
-              label: Text('Screwdriver'),
-            ),
-            Chip(
-              label: Text('Hammer'),
-            ),
-          ],
+          children: createCategoryChips(),
         ),
       ],
     );
+  }
+
+  List<Widget> createCategoryChips() {
+    List<Widget> chips = [];
+
+    for (var cat in widget.tool.categories) {
+      chips.add(Chip(
+        label: Text(cat),
+      ));
+    }
+
+    return chips;
   }
 }

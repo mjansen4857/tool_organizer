@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   void validateAndSubmit() {
     if (validateAndSave()) {
       if (_username != null) {
-        widget.db.getUserFullName(_username).then((value) {
+        Database.getUserFullName(_username).then((value) {
           if (value != null) {
             widget.loginCallback(_username, value);
           } else {

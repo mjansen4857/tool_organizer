@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tool_organizer/objects/tool.dart';
 import 'package:tool_organizer/pages/tool_info.dart';
 
 class ToolCard extends StatelessWidget {
-  final String toolName;
-  final String subtitle;
-  final String barcode;
+  final Tool tool;
 
-  ToolCard(this.toolName, this.subtitle, this.barcode);
+  ToolCard(this.tool);
 
   @override
   Widget build(BuildContext context) {
@@ -15,15 +14,18 @@ class ToolCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ToolInfo(barcode)),
+            MaterialPageRoute(
+                builder: (context) => ToolInfo(
+                      tool,
+                    )),
           );
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ListTile(
-              title: Text(toolName),
-              subtitle: Text(subtitle),
+              title: Text(tool.toolName),
+              subtitle: Text('Barcode: ' + tool.barcode),
             ),
           ],
         ),

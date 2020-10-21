@@ -5,10 +5,6 @@ import 'home_page.dart';
 import 'login_page.dart';
 
 class RootPage extends StatefulWidget {
-  final Database db;
-
-  RootPage({this.db});
-
   @override
   State<StatefulWidget> createState() => _RootPageState();
 }
@@ -24,7 +20,7 @@ class _RootPageState extends State<RootPage> {
     super.initState();
     _loggedIn = false;
     _username = null;
-    widget.db.openConnection().then((value) => setState(() {
+    Database.openConnection().then((value) => setState(() {
           _isLoading = false;
         }));
   }
@@ -51,7 +47,6 @@ class _RootPageState extends State<RootPage> {
     if (!_loggedIn) {
       return LoginPage(
         loginCallback: loginCallback,
-        db: widget.db,
       );
     } else {
       return HomePage(

@@ -42,10 +42,15 @@ class _HomePageState extends State<HomePage> {
   Widget buildPageContent() {
     switch (_pageState) {
       case PageState.BORROWED_TOOLS:
-        return BorrowedTools();
+        return BorrowedTools(
+          username: widget.username,
+        );
       case PageState.MY_TOOLS:
       default:
-        return MyTools();
+        return MyTools(
+          username: widget.username,
+          fullname: widget.fullname,
+        );
     }
   }
 
