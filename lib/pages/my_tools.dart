@@ -43,7 +43,10 @@ class _MyToolsState extends State<MyTools> {
       List<ToolCard> tools = [];
 
       for (var tool in value) {
-        tools.add(ToolCard(tool));
+        tools.add(ToolCard(
+          tool,
+          removeCallback: removeTool,
+        ));
       }
 
       setState(() {
@@ -63,6 +66,14 @@ class _MyToolsState extends State<MyTools> {
     _toolNameController.dispose();
     _barcodeController.dispose();
     super.dispose();
+  }
+
+  void removeTool(Tool tool) {
+    setState(() {
+      _toolCards = List.from(_toolCards)
+        ..removeWhere(
+            (element) => (element as ToolCard).tool.barcode == tool.barcode);
+    });
   }
 
   @override
@@ -165,7 +176,13 @@ class _MyToolsState extends State<MyTools> {
                       Database.addTool(widget.username, tool);
 
                       setState(() {
-                        _toolCards = [..._toolCards, ToolCard(tool)];
+                        _toolCards = [
+                          ..._toolCards,
+                          ToolCard(
+                            tool,
+                            removeCallback: removeTool,
+                          )
+                        ];
                       });
                     },
                   ),

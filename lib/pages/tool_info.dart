@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:tool_organizer/objects/lendable_tool.dart';
 import 'package:tool_organizer/objects/tool.dart';
 import 'package:tool_organizer/services/database.dart';
+import 'package:tool_organizer/services/utils.dart';
 
 class ToolInfo extends StatefulWidget {
   final Tool tool;
+  final Function(Tool) removeCallback;
 
-  ToolInfo(this.tool);
+  ToolInfo(this.tool, {this.removeCallback});
 
   @override
   State<StatefulWidget> createState() => _ToolInfoState();
@@ -44,15 +47,7 @@ class _ToolInfoState extends State<ToolInfo> {
         ),
       ),
       body: buildListView(),
-      floatingActionButton: !(widget.tool is LendableTool) ||
-              (widget.tool as LendableTool).lentTo != null
-          ? null
-          : FloatingActionButton(
-              child: Icon(Icons.call_made),
-              onPressed: () {
-                _lendToolDialog(context);
-              },
-            ),
+      floatingActionButton: buildSpeedDial(),
     );
   }
 
@@ -99,6 +94,58 @@ class _ToolInfoState extends State<ToolInfo> {
             ],
           );
         });
+  }
+
+  Widget buildSpeedDial() {
+    if (widget.removeCallback == null) return null;
+
+    if (widget.tool is LendableTool &&
+        (widget.tool as LendableTool).lentTo == null) {
+      return SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.6,
+        children: <SpeedDialChild>[
+          SpeedDialChild(
+            child: Icon(Icons.call_made),
+            label: 'Lend Tool',
+            labelStyle: TextStyle(fontSize: 18.0, color: Colors.black),
+            backgroundColor: Colors.green,
+            onTap: () {
+              _lendToolDialog(context);
+            },
+          ),
+          SpeedDialChild(
+              child: Icon(Icons.delete),
+              label: 'Remove Tool',
+              labelStyle: TextStyle(fontSize: 18.0, color: Colors.black),
+              backgroundColor: Colors.red,
+              onTap: () {
+                Database.removeTool(widget.tool.barcode);
+                Navigator.pop(context);
+                widget.removeCallback(widget.tool);
+              }),
+        ],
+      );
+    } else {
+      return SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.6,
+        children: <SpeedDialChild>[
+          SpeedDialChild(
+              child: Icon(Icons.delete),
+              label: 'Remove Tool',
+              labelStyle: TextStyle(fontSize: 18.0, color: Colors.black),
+              backgroundColor: Colors.red,
+              onTap: () {
+                Database.removeTool(widget.tool.barcode);
+                Navigator.pop(context);
+                widget.removeCallback(widget.tool);
+              }),
+        ],
+      );
+    }
   }
 
   Widget buildUsernameInput() {
@@ -281,7 +328,7 @@ class _ToolInfoState extends State<ToolInfo> {
         ),
         Text(
           (tool.requiredReturnDate) != null
-              ? tool.requiredReturnDate.toString()
+              ? Utils.formatDate(tool.requiredReturnDate)
               : 'Not Lent',
           style: TextStyle(fontSize: 18),
         ),
@@ -300,7 +347,7 @@ class _ToolInfoState extends State<ToolInfo> {
           width: 6,
         ),
         Text(
-          widget.tool.purchaseDate.toString(),
+          Utils.formatDate(widget.tool.purchaseDate),
           style: TextStyle(fontSize: 18),
         ),
       ],

@@ -25,6 +25,12 @@ class _RootPageState extends State<RootPage> {
         }));
   }
 
+  @override
+  void dispose() {
+    Database.closeConnection();
+    super.dispose();
+  }
+
   void loginCallback(String username, String fullname) {
     setState(() {
       _loggedIn = true;

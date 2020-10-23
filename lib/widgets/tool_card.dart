@@ -4,8 +4,9 @@ import 'package:tool_organizer/pages/tool_info.dart';
 
 class ToolCard extends StatelessWidget {
   final Tool tool;
+  final Function(Tool) removeCallback;
 
-  ToolCard(this.tool);
+  ToolCard(this.tool, {this.removeCallback});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,7 @@ class ToolCard extends StatelessWidget {
             MaterialPageRoute(
                 builder: (context) => ToolInfo(
                       tool,
+                      removeCallback: removeCallback,
                     )),
           );
         },
@@ -25,7 +27,7 @@ class ToolCard extends StatelessWidget {
           children: <Widget>[
             ListTile(
               title: Text(tool.toolName),
-              subtitle: Text('Barcode: ' + tool.barcode),
+              subtitle: Text(tool.barcode),
             ),
           ],
         ),

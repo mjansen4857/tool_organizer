@@ -22,6 +22,7 @@ environment:
 
 dependencies:
   postgres: ^2.2.0
+  flutter_speed_dial: ^1.2.5
   flutter:
     sdk: flutter
 
