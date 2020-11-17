@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tool_organizer/pages/analytics_page.dart';
 import 'package:tool_organizer/pages/borrowed_tools.dart';
 import 'package:tool_organizer/pages/my_tools.dart';
 
-enum PageState { MY_TOOLS, BORROWED_TOOLS }
+enum PageState { MY_TOOLS, BORROWED_TOOLS, ANALYTICS }
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -20,19 +21,43 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(getAppBarText()),
+    return DefaultTabController(
+      length: 5,
+      child: Scaffold(
+        appBar: buildAppBar(),
+        drawer: buildDrawer(),
+        body: buildPageContent(),
       ),
-      drawer: buildDrawer(),
-      body: buildPageContent(),
     );
+  }
+
+  Widget buildAppBar() {
+    if (_pageState == PageState.ANALYTICS) {
+      return AppBar(
+        title: Text(getAppBarText()),
+        bottom: TabBar(
+          tabs: <Widget>[
+            Tab(text: 'Missing Tools'),
+            Tab(text: 'Most Lent'),
+            Tab(text: 'Biggest Lenders'),
+            Tab(text: 'Biggest Borrowers'),
+            Tab(text: 'Biggest Collections'),
+          ],
+        ),
+      );
+    } else {
+      return AppBar(
+        title: Text(getAppBarText()),
+      );
+    }
   }
 
   String getAppBarText() {
     switch (_pageState) {
       case PageState.BORROWED_TOOLS:
         return 'Borrowed Tools';
+      case PageState.ANALYTICS:
+        return 'Analytics';
       case PageState.MY_TOOLS:
       default:
         return 'My Tools';
@@ -43,6 +68,10 @@ class _HomePageState extends State<HomePage> {
     switch (_pageState) {
       case PageState.BORROWED_TOOLS:
         return BorrowedTools(
+          username: widget.username,
+        );
+      case PageState.ANALYTICS:
+        return AnalyticsPage(
           username: widget.username,
         );
       case PageState.MY_TOOLS:
@@ -94,6 +123,18 @@ class _HomePageState extends State<HomePage> {
                     Navigator.pop(context);
                     setState(() {
                       _pageState = PageState.BORROWED_TOOLS;
+                    });
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.cloud,
+                  ),
+                  title: Text('Analytics'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _pageState = PageState.ANALYTICS;
                     });
                   },
                 ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:postgres/postgres.dart';
 import 'package:tool_organizer/objects/lendable_tool.dart';
 import 'package:tool_organizer/objects/tool.dart';
@@ -113,6 +114,115 @@ class Database {
     }
 
     return tools;
+  }
+
+  static Future<List<Card>> getMissingToolCards(String username) async {
+    List<List<dynamic>> results = await connection.query(
+        'SELECT tool_name, '
+        'first_name, last_name FROM (SELECT name AS tool_name, lendee_username '
+        'FROM (SELECT barcode AS tool_code, username AS lendee_username FROM '
+        'lent_to WHERE barcode IN (SELECT barcode FROM tools WHERE username = '
+        '@username)) as my_lent INNER JOIN tools ON barcode=tool_code) '
+        'as my_lent_name INNER JOIN users ON username=lendee_username;',
+        substitutionValues: {'username': username});
+
+    List<Card> cards = [];
+    for (var result in results) {
+      cards.add(Card(
+        child: ListTile(
+          title: Text('Missing tool: ' + result[0]),
+          trailing: Text('Lent to: ' + result[1] + ' ' + result[2]),
+        ),
+      ));
+    }
+
+    return cards;
+  }
+
+  static Future<List<Card>> getMyMostLentToolCards(String username) async {
+    List<List<dynamic>> results = await connection.query(
+        'SELECT name, lend_count FROM '
+        '(SELECT barcode AS lend_bar, COUNT(*) AS lend_count FROM '
+        '(SELECT barcode FROM lendable_tool_history WHERE barcode IN '
+        '(SELECT barcode FROM tools WHERE username = @username AND removed_date IS NULL))'
+        ' AS my_lend_history GROUP BY barcode) AS lend_count_tbl '
+        'INNER JOIN tools ON lend_bar=barcode ORDER BY lend_count DESC;',
+        substitutionValues: {'username': username});
+
+    List<Card> cards = [];
+    for (var result in results) {
+      cards.add(Card(
+        child: ListTile(
+          title: Text('Tool: ' + result[0]),
+          trailing: Text('Lent ' + result[1].toString() + ' time(s)'),
+        ),
+      ));
+    }
+
+    return cards;
+  }
+
+  static Future<List<Card>> getBiggestLenderCards() async {
+    List<List<dynamic>> results = await connection.query(
+        'SELECT first_name, last_name, total_count FROM '
+        '(SELECT username AS usr, COUNT(*) AS total_count FROM '
+        '(SELECT username FROM (SELECT barcode AS hist_bar FROM lendable_tool_history) '
+        'AS hist INNER JOIN tools ON barcode=hist_bar) AS full_hist_user GROUP BY username) '
+        'AS biggest_usrs INNER JOIN users ON usr=username ORDER BY total_count DESC;',
+        substitutionValues: {});
+
+    List<Card> cards = [];
+    for (var result in results) {
+      cards.add(Card(
+        child: ListTile(
+          title: Text(result[0] + ' ' + result[1]),
+          trailing: Text('Lent their tools ' + result[2].toString() + ' times'),
+        ),
+      ));
+    }
+
+    return cards;
+  }
+
+  static Future<List<Card>> getBiggestBorrowerCards() async {
+    List<List<dynamic>> results = await connection.query(
+        'SELECT first_name, last_name, borrow_count FROM '
+        '(SELECT username AS usr, COUNT(*) AS borrow_count FROM '
+        '(SELECT username FROM lent_to) AS lent_usrs GROUP BY username) '
+        'AS lent_usrs_grouped INNER JOIN users ON usr=username ORDER BY borrow_count DESC;',
+        substitutionValues: {});
+
+    List<Card> cards = [];
+    for (var result in results) {
+      cards.add(Card(
+        child: ListTile(
+          title: Text(result[0] + ' ' + result[1]),
+          trailing: Text('Borrowing ' + result[2].toString() + ' tools'),
+        ),
+      ));
+    }
+
+    return cards;
+  }
+
+  static Future<List<Card>> getBiggestCollectionsCards() async {
+    List<List<dynamic>> results = await connection.query(
+        'SELECT first_name, last_name, tool_count FROM (SELECT username AS usr, COUNT(*) '
+        'AS tool_count FROM (SELECT username, barcode FROM tools WHERE removed_date IS NULL) '
+        'AS usr_tools GROUP BY username) AS usr_tool_count INNER JOIN users ON usr=username ORDER BY tool_count DESC;',
+        substitutionValues: {});
+
+    List<Card> cards = [];
+    for (var result in results) {
+      cards.add(Card(
+        child: ListTile(
+          title: Text(result[0] + ' ' + result[1]),
+          trailing: Text('Owns ' + result[2].toString() + ' tools'),
+        ),
+      ));
+    }
+
+    return cards;
   }
 
   static Future<void> addTool(String username, Tool tool) async {
